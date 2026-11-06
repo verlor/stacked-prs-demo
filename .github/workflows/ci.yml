@@ -1,0 +1,35 @@
+name: CI
+
+# Runs for every PR in a stack: GitHub evaluates each stacked PR
+# as if it targeted the stack's base branch (main).
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn build
+      - name: Where am I in the stack?
+        if: github.event.pull_request.stack != null
+        run: >
+          echo "Layer ${{ github.event.pull_request.stack.position }}
+          of ${{ github.event.pull_request.stack.size }}
+          in stack #${{ github.event.pull_request.stack.number }}"
+
+  # Expensive checks only on the top PR, which contains every layer.
+  top-of-stack:
+    if: >
+      github.event.pull_request.stack != null &&
+      github.event.pull_request.stack.position == github.event.pull_request.stack.size
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Top of the stack - full-feature checks (e2e, visual) would run here"
