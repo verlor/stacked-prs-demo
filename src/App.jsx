@@ -21,9 +21,8 @@ const FILTER_MAP = {
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 function App(props) {
-  const { tasks, addTask, toggleTask, renameTask, deleteTask } = useTasks(
-    props.tasks,
-  );
+  const { tasks, addTask, toggleTask, renameTask, deleteTask, clearCompleted } =
+    useTasks(props.tasks);
   const [filter, setFilter] = useState("All");
 
   const taskList = tasks
@@ -51,6 +50,7 @@ function App(props) {
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
   const headingText = `${taskList.length} ${tasksNoun} remaining`;
+  const completedCount = tasks.filter((task) => task.completed).length;
 
   const listHeadingRef = useRef(null);
   const prevTaskLength = usePrevious(tasks.length);
@@ -76,6 +76,16 @@ function App(props) {
       >
         {taskList}
       </ul>
+      <div className="btn-group">
+        <button
+          type="button"
+          className="btn btn__danger"
+          disabled={completedCount === 0}
+          onClick={clearCompleted}
+        >
+          Clear completed ({completedCount})
+        </button>
+      </div>
     </div>
   );
 }
