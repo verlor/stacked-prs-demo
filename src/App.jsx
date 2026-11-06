@@ -2,7 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import Form from "./components/Form";
 import FilterButton from "./components/FilterButton";
 import Todo from "./components/Todo";
-import { nanoid } from "nanoid";
+import {
+  createTask,
+  isValidTaskName,
+  removeTask,
+  renameTask,
+  toggleTask,
+} from "./lib/tasks";
 
 function usePrevious(value) {
   const ref = useRef(null);
@@ -25,34 +31,16 @@ function App(props) {
   const [filter, setFilter] = useState("All");
 
   function toggleTaskCompleted(id) {
-    const updatedTasks = tasks.map((task) => {
-      // if this task has the same ID as the edited task
-      if (id === task.id) {
-        // use object spread to make a new obkect
-        // whose `completed` prop has been inverted
-        return { ...task, completed: !task.completed };
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+    setTasks(toggleTask(tasks, id));
   }
 
   function deleteTask(id) {
-    const remainingTasks = tasks.filter((task) => id !== task.id);
-    setTasks(remainingTasks);
+    setTasks(removeTask(tasks, id));
   }
 
   function editTask(id, newName) {
-    const editedTaskList = tasks.map((task) => {
-      // if this task has the same ID as the edited task
-      if (id === task.id) {
-        // Copy the task and update its name
-        return { ...task, name: newName };
-      }
-      // Return the original task if it's not the edited task
-      return task;
-    });
-    setTasks(editedTaskList);
+    if (!isValidTaskName(newName)) return;
+    setTasks(renameTask(tasks, id, newName));
   }
 
   const taskList = tasks
@@ -79,8 +67,8 @@ function App(props) {
   ));
 
   function addTask(name) {
-    const newTask = { id: "todo-" + nanoid(), name: name, completed: false };
-    setTasks([...tasks, newTask]);
+    if (!isValidTaskName(name)) return;
+    setTasks([...tasks, createTask(name)]);
   }
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
