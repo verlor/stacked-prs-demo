@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { isValidTaskName } from "../lib/tasks";
 
 function usePrevious(value) {
   const ref = useRef(null);
@@ -21,9 +22,6 @@ function Todo(props) {
     setNewName(event.target.value);
   }
 
-  // NOTE: As written, this function has a bug: it doesn't prevent the user
-  // from submitting an empty form. This is left as an exercise for developers
-  // working through MDN's React tutorial.
   function handleSubmit(event) {
     event.preventDefault();
     props.editTask(props.id, newName);
@@ -54,7 +52,10 @@ function Todo(props) {
           Cancel
           <span className="visually-hidden">renaming {props.name}</span>
         </button>
-        <button type="submit" className="btn btn__primary todo-edit">
+        <button
+          type="submit"
+          className="btn btn__primary todo-edit"
+          disabled={!isValidTaskName(newName)}>
           Save
           <span className="visually-hidden">new name for {props.name}</span>
         </button>
