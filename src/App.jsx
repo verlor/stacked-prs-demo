@@ -2,13 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Form from "./components/Form";
 import FilterButton from "./components/FilterButton";
 import Todo from "./components/Todo";
-import {
-  createTask,
-  isValidTaskName,
-  removeTask,
-  renameTask,
-  toggleTask,
-} from "./lib/tasks";
+import { useTasks } from "./hooks/useTasks";
 
 function usePrevious(value) {
   const ref = useRef(null);
@@ -27,21 +21,10 @@ const FILTER_MAP = {
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 function App(props) {
-  const [tasks, setTasks] = useState(props.tasks);
+  const { tasks, addTask, toggleTask, renameTask, deleteTask } = useTasks(
+    props.tasks,
+  );
   const [filter, setFilter] = useState("All");
-
-  function toggleTaskCompleted(id) {
-    setTasks(toggleTask(tasks, id));
-  }
-
-  function deleteTask(id) {
-    setTasks(removeTask(tasks, id));
-  }
-
-  function editTask(id, newName) {
-    if (!isValidTaskName(newName)) return;
-    setTasks(renameTask(tasks, id, newName));
-  }
 
   const taskList = tasks
     ?.filter(FILTER_MAP[filter])
@@ -51,9 +34,9 @@ function App(props) {
         name={task.name}
         completed={task.completed}
         key={task.id}
-        toggleTaskCompleted={toggleTaskCompleted}
+        toggleTaskCompleted={toggleTask}
         deleteTask={deleteTask}
-        editTask={editTask}
+        editTask={renameTask}
       />
     ));
 
@@ -65,11 +48,6 @@ function App(props) {
       setFilter={setFilter}
     />
   ));
-
-  function addTask(name) {
-    if (!isValidTaskName(name)) return;
-    setTasks([...tasks, createTask(name)]);
-  }
 
   const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
   const headingText = `${taskList.length} ${tasksNoun} remaining`;
