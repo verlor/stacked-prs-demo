@@ -4,11 +4,11 @@ import { nanoid } from "nanoid";
 // never mutates its input, so they are easy to test and reuse.
 
 export function isValidTaskName(name) {
-  return typeof name === "string" && name.length > 0;
+  return typeof name === "string" && name.trim().length > 0;
 }
 
 export function createTask(name) {
-  return { id: "todo-" + nanoid(), name, completed: false };
+  return { id: "todo-" + nanoid(), name: name.trim(), completed: false };
 }
 
 export function toggleTask(tasks, id) {
@@ -19,7 +19,7 @@ export function toggleTask(tasks, id) {
 
 export function renameTask(tasks, id, newName) {
   return tasks.map((task) =>
-    task.id === id ? { ...task, name: newName } : task,
+    task.id === id ? { ...task, name: newName.trim() } : task,
   );
 }
 
